@@ -1,60 +1,38 @@
-import { makeAuthenticateUseCase } from '@/factories/make-authenticate-use-case'
-import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
+import { compare } from 'bcryptjs'
+import { User } from '@prisma/client'
+import { UsersRepository } from '@/repositories/interfaces/users-repository'
+import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 
-export async function authenticate (req: FastifyRequest, res: FastifyReply) {
-  const authenticateBodySchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(6)
-  })
+interface AuthenticateUseCaseRequest {
+  email: string
+  password: string
+}
 
-  const { email, password } = authenticateBodySchema.parse(req.body)
+interface AuthenticateUseCaseResponse {
+  user: User
+}
 
-  try {
-    const authenticateUseCase = makeAuthenticateUseCase()
+export class AuthenticateUseCase {
+  constructor (private readonly usersRepository: UsersRepository) {}
 
-    const { user } = await authenticateUseCase.execute({
-      email, password
-    })
+  async execute ({
+    email,
+    password
+  }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
+    const user = await this.usersRepository.findByEmail(email)
 
-    const token = await res.jwtSign(
-      {
-        role: user.role
-      },
-      {
-        sign: {
-          sub: user.id
-        }
+    if (!user) {
+      throw new InvalidCredentialsError()
+    }
+    if(user.password){
+      const doesPasswordMatches = await compare(password, user.password)
+      if (!doesPasswordMatches) {
+        throw new InvalidCredentialsError()
       }
-    )
-
-    const refreshToken = await res.jwtSign(
-      {},
-      {
-        sign: {
-          sub: user.id,
-          expiresIn: '7d'
-        }
-      }
-    )
-
-    return res
-      .setCookie('refreshToken', refreshToken, {
-        path: '/',
-        secure: true, // O Front va poder ler esse token
-        sameSite: true,
-        httpOnly: true
-      })
-      .status(200)
-      .send({
-        token
-      })
-  } catch (err) {
-    if (err instanceof InvalidCredentialsError) {
-      return res.status(400).send({ message: err.message })
     }
 
-    return res.status(500).send()
+    return {
+      user
+    }
   }
 }
