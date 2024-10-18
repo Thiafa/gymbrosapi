@@ -4,7 +4,8 @@ import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import { ZodError } from 'zod'
 import { env } from './env'
-// import { usersRoutes } from './http/controllers/user/routes'
+import { usersRoutes } from './http/controllers/user/routes'
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 export const app = fastify()
 
@@ -24,10 +25,50 @@ app.register(cors, {
   // origin: ['http://localhost:5173'], // Substitua pelo seu endereço de front-end
   credentials: true // Permitir credenciais
 })
-
 app.register(fastifyCookie)
 
-// app.register(usersRoutes)
+app.register(usersRoutes)
+
+interface QueryParams {
+  name?: string;
+  excitement?: number;
+}
+
+// Defina o tipo para a resposta
+interface HelloResponse {
+  hello: string;
+}
+
+app.route<{ Querystring: QueryParams, Reply: HelloResponse }>({
+  method: 'GET',
+  url: '/',
+  schema: {
+    querystring: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        excitement: { type: 'integer' }
+      },
+      required: []
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          hello: { type: 'string' }
+        }
+      }
+    }
+  },
+  handler: async (request: FastifyRequest<{ Querystring: QueryParams }>, reply: FastifyReply) => {
+    const { name = 'world', excitement = 1 } = request.query;
+
+    // Gere a resposta
+    const response = { hello: `${name}${'!'.repeat(excitement)}` };
+    
+    reply.send(response);
+  }
+});
 
 
 app.setErrorHandler((error, _, reply) => {

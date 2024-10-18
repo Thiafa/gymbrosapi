@@ -8,23 +8,23 @@ export async function CreateUser (req: FastifyRequest, res: FastifyReply) {
     name: z.string().min(3, 'O nome deve ter mais de 3 caracteres'),
     email: z.string().min(3, 'O email deve ter mais de 3 caracteres'),
     password: z.string().min(6, 'A senha deve ter mais de 6 caracteres'),
-    phone: z.string().min(6).optional(),
-    role: z.string().min(1)
+    // phone: z.string().min(6).optional(),
+    // role: z.string().min(1)
   })
 
   const {
     name,
     email,
     password,
-    phone,
-    role
+    // phone,
+    // role
   } = createUserBodySchema.parse(req.body)
 
   try {
     const createUserUseCase = makeCreateUserUseCase()
 
     await createUserUseCase.execute({
-      name, email, password, phone, role
+      name, email, password
     })
   } catch (err) {
     if (err instanceof UserAlreadyExistsError) {
