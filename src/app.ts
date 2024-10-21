@@ -4,7 +4,7 @@ import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import { ZodError } from 'zod'
 import { env } from './env'
-// import { usersRoutes } from './http/controllers/user/routes'
+import { usersRoutes } from './http/controllers/user/routes'
 
 export const app = fastify()
 
@@ -27,7 +27,7 @@ app.register(cors, {
 
 app.register(fastifyCookie)
 
-// app.register(usersRoutes)
+app.register(usersRoutes)
 
 
 app.setErrorHandler((error, _, reply) => {

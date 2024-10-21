@@ -1,3 +1,4 @@
+// Interfaces dos métodos que a classe terá
 import { PaginationType } from '@/@types/paginate'
 import { type Prisma, type User } from '@prisma/client'
 

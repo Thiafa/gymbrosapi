@@ -11,7 +11,6 @@ import { verifyJWT } from '@/http/middlewares/verify-jtw'
 export async function usersRoutes (app: FastifyInstance) {
   app.post('/login', authenticate)
   // app.patch('/token/refresh', refresh)
-
   app.post('/users', CreateUser)
   app.get('/users', { onRequest: [verifyJWT] }, GetUser)
   // app.put('/users/:id', UpdateUser)

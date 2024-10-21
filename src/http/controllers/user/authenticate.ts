@@ -10,21 +10,19 @@ export async function authenticate(req: FastifyRequest, res: FastifyReply) {
   })
 
   const { email, password } = authenticateBodySchema.parse(req.body)
-
+  
   try {
     const authenticateUseCase = makeAuthenticateUseCase()
-
+    
     const { user } = await authenticateUseCase.execute({
       email, password
     })
-
+    
     const token = await res.jwtSign(
-      {
-        role: user.role
-      },
+      {},
       {
         sign: {
-          sub: user.id
+          sub: user.id.toString()
         }
       }
     )
@@ -33,7 +31,7 @@ export async function authenticate(req: FastifyRequest, res: FastifyReply) {
       {},
       {
         sign: {
-          sub: user.id,
+          sub: user.id.toString(),
           expiresIn: '7d'
         }
       }
@@ -55,6 +53,6 @@ export async function authenticate(req: FastifyRequest, res: FastifyReply) {
       return res.status(400).send({ message: err.message })
     }
 
-    return res.status(500).send()
+    return res.status(500).send(err)
   }
 }
