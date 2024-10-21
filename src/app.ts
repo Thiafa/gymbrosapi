@@ -27,7 +27,7 @@ app.register(cors, {
 })
 app.register(fastifyCookie)
 
-// app.register(usersRoutes)
+app.register(usersRoutes)
 
 
 app.setErrorHandler((error, _, reply) => {

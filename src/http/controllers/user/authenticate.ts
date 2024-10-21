@@ -8,6 +8,7 @@ export async function authenticate(req: FastifyRequest, res: FastifyReply) {
     email: z.string().email(),
     password: z.string().min(6)
   })
+  
   const { email, password } = authenticateBodySchema.parse(req.body)
   
   try {
@@ -26,6 +27,7 @@ export async function authenticate(req: FastifyRequest, res: FastifyReply) {
       }
     )
     const refreshToken = await res.jwtSign(
+      {},
       {
         sign: {
           sub: user.id.toString(),
