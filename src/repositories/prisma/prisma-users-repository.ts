@@ -5,12 +5,13 @@ import { PaginationType } from '@/@types/paginate'
 
 export class PrismaUsersRepository implements UsersRepository {
   async findById (id: string) {
+    console.log(typeof id)
+    const userId = Number(id)
     const user = await prisma.user.findUnique({
       where: {
-        id
+        id: userId
       }
     })
-
     return user
   }
 
@@ -48,8 +49,9 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async update (id: string, data: Prisma.UserUpdateInput) {
+    const userId = Number(id)
     const user = await prisma.user.update({
-      where: { id },
+      where: { id: userId },
       data
     })
 
@@ -57,10 +59,11 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async delete (id: string) {
-    const user = await prisma.user.delete({
-      where: { id }
-    })
-
-    return user
+    const userId = Number(id)
+      const user = await prisma.user.delete({
+        where: { id: userId }
+      }) 
+      return user
+    
   }
 }
