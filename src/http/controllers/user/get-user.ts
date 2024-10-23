@@ -1,5 +1,6 @@
 import { PaginationQuery } from '@/@types/festifyRequest'
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository'
+import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-error'
 import { GetUserUseCase } from '@/use-cases/users/get-user'
 import { FastifyReply } from 'fastify'
 
@@ -15,9 +16,9 @@ export async function GetUser (req: PaginationQuery, res: FastifyReply) {
 
     return users
   } catch (err) {
-    // if (err instanceof UserAlreadyExistsError) {
-    //   return res.status(409).send({ message: err.message })
-    // }
+    if (err instanceof UserAlreadyExistsError) {
+      return res.status(409).send({ message: err.message })
+    }
     console.error(err)
 
     return res.status(500).send()

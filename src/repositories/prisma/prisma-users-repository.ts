@@ -4,8 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { PaginationType } from '@/@types/paginate'
 
 export class PrismaUsersRepository implements UsersRepository {
-  async findById (id: string) {
-    console.log(typeof id)
+  async findById(id: string) {
     const userId = Number(id)
     const user = await prisma.user.findUnique({
       where: {
@@ -14,15 +13,22 @@ export class PrismaUsersRepository implements UsersRepository {
     })
     return user
   }
-
-  async getAll (page: number, pageSize: number): Promise<PaginationType<User>> {
+  
+  async getAll(page: number, pageSize: number): Promise<PaginationType<User>> {
     const skip = (page - 1) * pageSize
     const take = pageSize
 
     const [data, totalCount] = await Promise.all([
       await prisma.user.findMany({
         skip,
-        take
+        take,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          password: false
+        }
       }),
       prisma.user.count()
     ])
@@ -30,7 +36,7 @@ export class PrismaUsersRepository implements UsersRepository {
     return { data, totalCount }
   }
 
-  async findByEmail (email: string) {
+  async findByEmail(email: string) {
     const user = await prisma.user.findUnique({
       where: {
         email
@@ -40,7 +46,7 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async create (data: Prisma.UserCreateInput) {
+  async create(data: Prisma.UserCreateInput) {
     const user = await prisma.user.create({
       data
     })
@@ -48,7 +54,7 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async update (id: string, data: Prisma.UserUpdateInput) {
+  async update(id: string, data: Prisma.UserUpdateInput) {
     const userId = Number(id)
     const user = await prisma.user.update({
       where: { id: userId },
@@ -58,12 +64,12 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async delete (id: string) {
+  async delete(id: string) {
     const userId = Number(id)
-      const user = await prisma.user.delete({
-        where: { id: userId }
-      }) 
-      return user
-    
+    const user = await prisma.user.delete({
+      where: { id: userId }
+    })
+    return user
+
   }
 }
